@@ -20,7 +20,7 @@ def register():
         empCode = request.form['empCode'] 
         image = request.files.get('image')
         
-        path = 'register'+'/'+ image.filename
+        path = 'register/'+ empCode +'.jpg'
         region_name='us-east-2'
         bucket ='attandence-bucket'
         TableName='attandence_collection'
@@ -58,7 +58,7 @@ def register():
                     return jsonify({"respose": "Successfully registered"})             
             
                 else:
-                    return jsonify({'respose':"image not added to index_faces"}), 404
+                    return jsonify({'respose':"image not added to dynamoDB"}), 404
             
             else:
                 return jsonify({'respose':"image not added to index_faces"}), 404
@@ -69,7 +69,6 @@ def register():
     except:
         return jsonify({'respose':"image not found"}), 404
     
-
 @application.route("/verify",methods=["POST"])
 
 def verify():
@@ -78,7 +77,7 @@ def verify():
         image = request.files.get('image')
         
         threshold=80
-        path = 'verify'+'/'+ image.filename
+        path = 'verify/'+ empCode +'.jpg'
         region_name='us-east-2'
         bucket ='attandence-bucket'
         TableName='attandence_collection'
