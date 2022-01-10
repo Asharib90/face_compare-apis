@@ -1,8 +1,5 @@
-from re import A
 from flask import Flask, request, jsonify, flash
 import boto3
-import io
-from PIL import Image
 
 # EB looks for an 'application' callable by default.
 application = Flask(__name__)
@@ -44,28 +41,28 @@ def register():
                                 DetectionAttributes=['ALL'])
 
             if index_face_response['ResponseMetadata']['HTTPStatusCode'] ==  200:
-
-                faceId = index_face_response['FaceRecords'][0]['Face']['FaceId']
-                dynamodb_response = dynamodb.put_item(
-                    TableName = TableName,
-                    Item={
-                        'RekognitionId': {'S': faceId},
-                        'empCode': {'S': empCode}
-                        }
-                    )
                 
-                if dynamodb_response['ResponseMetadata']['HTTPStatusCode'] ==  200:
-                    return jsonify({"respose": "Successfully registered"})             
-            
-                else:
-                    return jsonify({'respose':"image not added to dynamoDB"}), 404
-            
+                try:               
+                    faceId = index_face_response['FaceRecords'][0]['Face']['FaceId']
+                    dynamodb_response = dynamodb.put_item(
+                        TableName = TableName,
+                        Item={
+                            'RekognitionId': {'S': faceId},
+                            'empCode': {'S': empCode}
+                            }
+                        )
+                    
+                    if dynamodb_response['ResponseMetadata']['HTTPStatusCode'] ==  200:
+                        return jsonify({"respose": "Successfully registered"})             
+                
+                    else:
+                        return jsonify({'respose':"image not added to dynamoDB"}), 404
+                except:
+                    return jsonify({'respose':"image does not contain face"}), 404            
             else:
                 return jsonify({'respose':"image not added to index_faces"}), 404
-            
         else:
             return jsonify({'respose':"image not uploaded on S3"}), 404
-
     except:
         return jsonify({'respose':"image not found"}), 404
     
@@ -93,45 +90,44 @@ def verify():
                         )
         
         if s3_upload['ResponseMetadata']['HTTPStatusCode'] ==  200:
-            search_faces_by_image_response = rekognition.search_faces_by_image(
-                Image={
-                    "S3Object": {
-                        "Bucket": bucket,
-                        "Name": path,
-                    }
-                },
-                CollectionId=collection_id,
-                FaceMatchThreshold=threshold)
-            
-            if search_faces_by_image_response['ResponseMetadata']['HTTPStatusCode'] ==  200:
 
-                try :                   
-                    
-                    faceId = search_faces_by_image_response['FaceMatches'][0]['Face']['FaceId']
+            try :                                       
+                search_faces_by_image_response = rekognition.search_faces_by_image(
+                    Image={
+                        "S3Object": {
+                            "Bucket": bucket,
+                            "Name": path,
+                        }
+                    },
+                    CollectionId=collection_id,
+                    FaceMatchThreshold=threshold)
+                            
+                if search_faces_by_image_response['ResponseMetadata']['HTTPStatusCode'] ==  200:
 
-                    dynamodb_response = dynamodb.get_item(
-                        TableName=TableName,  
-                        Key={'RekognitionId':{'S': faceId}})
-                    
-                    if dynamodb_response['ResponseMetadata']['HTTPStatusCode'] ==  200 :
-                        print('flag')
+                    try :               
+                        faceId = search_faces_by_image_response['FaceMatches'][0]['Face']['FaceId']
+
+                        dynamodb_response = dynamodb.get_item(
+                            TableName=TableName,  
+                            Key={'RekognitionId':{'S': faceId}})
                         
-                        if dynamodb_response['Item']['empCode']['S']==empCode:
+                        if dynamodb_response['ResponseMetadata']['HTTPStatusCode'] ==  200 :
+                            print('flag')
+                            
+                            if dynamodb_response['Item']['empCode']['S']==empCode:
+                            
+                                return jsonify({"respose": "verification succeded"}), 200
                         
-                            return jsonify({"respose": "verification succeded"}), 200
-                    
+                            else:
+                                return jsonify({'respose':"verification failed"}), 404             
                         else:
-                            return jsonify({'respose':"verification failed"}), 404             
-                
-                    else:
-                        return jsonify({'respose':"image not added to index_faces"}), 404
-                    
-                except:
-                    return jsonify({'respose':"verification failed"}), 404  
-        
-            else:
-                return jsonify({'respose':"search faces by image not working"}), 404      
-        
+                            return jsonify({'respose':"image not added to index_faces"}), 404
+                    except:
+                        return jsonify({'respose':"verification failed"}), 404  
+                else:
+                    return jsonify({'respose':"search faces by image not working"}), 404  
+            except:
+                return jsonify({'respose':"image does not contain face"}), 404      
         else:
             return jsonify({'respose':"image not uploaded on S3"}), 404      
     except:
