@@ -117,14 +117,14 @@ def verify():
                             
                             if dynamodb_response['Item']['empCode']['S']==empCode:
                             
-                                return jsonify({"respose": "verification succeded"}), 200
+                                return jsonify({"respose": "face verification succeded"}), 200
                         
                             else:
-                                return jsonify({'respose':"verification failed"}), 404             
+                                return jsonify({'respose':"face verification failed"}), 404             
                         else:
                             return jsonify({'respose':"image not added to index_faces"}), 404
                     except:
-                        return jsonify({'respose':"verification failed"}), 404  
+                        return jsonify({'respose':"face verification failed"}), 404  
                 else:
                     return jsonify({'respose':"search faces by image not working"}), 404  
             except:
