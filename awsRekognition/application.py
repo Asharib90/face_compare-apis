@@ -118,7 +118,7 @@ def verify():
                             
                                 return jsonify({"respose": "Face verification succeded"}), 200
                             else:
-                                return jsonify({'respose':"User face does mot match with employee ID"}), 404             
+                                return jsonify({'respose':"User face does not match with employee ID"}), 404             
                         else:
                             return jsonify({'respose':"image not added to index_faces"}), 404
                     except:
