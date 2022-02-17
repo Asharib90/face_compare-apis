@@ -113,13 +113,12 @@ def verify():
                             Key={'RekognitionId':{'S': faceId}})
                         
                         if dynamodb_response['ResponseMetadata']['HTTPStatusCode'] ==  200 :
-                            print('flag')
                             
                             if dynamodb_response['Item']['empCode']['S']==empCode:
                             
-                                return jsonify({"respose": "face verification succeded"}), 200
+                                return jsonify({"respose": "Face verification succeded"}), 200
                             else:
-                                return jsonify({'respose':"face verification failed"}), 404             
+                                return jsonify({'respose':"Employee code not verified"}), 404             
                         else:
                             return jsonify({'respose':"image not added to index_faces"}), 404
                     except:
