@@ -53,7 +53,7 @@ def register():
                       )
                   
                   if dynamodb_response['ResponseMetadata']['HTTPStatusCode'] ==  200:
-                      return jsonify({"respose": "Successfully registered"})             
+                      return jsonify({"respose": "Face successfully registered"})             
               
                   else:
                       return jsonify({'respose':"image not added to dynamoDB"}), 404
@@ -118,7 +118,6 @@ def verify():
                             if dynamodb_response['Item']['empCode']['S']==empCode:
                             
                                 return jsonify({"respose": "face verification succeded"}), 200
-                        
                             else:
                                 return jsonify({'respose':"face verification failed"}), 404             
                         else:
