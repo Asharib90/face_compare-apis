@@ -17,8 +17,6 @@ def register():
       empCode = request.form['empCode'] 
       image = request.files.get('image')
       
-      
-      threshold=70
       path = 'register/'+ empCode +'.jpg'
       region_name='us-east-2'
       bucket ='attandence-bucket'
@@ -36,60 +34,33 @@ def register():
       
       if s3_upload['ResponseMetadata']['HTTPStatusCode'] ==  200:
           
-          try :                                       
-                search_faces_by_image_response = rekognition.search_faces_by_image(
-                    Image={
-                        "S3Object": {
-                            "Bucket": bucket,
-                            "Name": path,
-                        }
-                    },
-                    CollectionId=collection_id,
-                    FaceMatchThreshold=threshold)
-                            
-                if search_faces_by_image_response['ResponseMetadata']['HTTPStatusCode'] ==  200:
-                    try :                                       
-                        faceId = search_faces_by_image_response['FaceMatches'][0]['Face']['FaceId']
-                        
-                        dynamodb_response = dynamodb.get_item(
-                            TableName=TableName,  
-                            Key={'RekognitionId':{'S': faceId}})
-                        
-                        if dynamodb_response['ResponseMetadata']['HTTPStatusCode'] ==  200 :
-                            return jsonify({'respose':"Face already registered on ID: " +  dynamodb_response['Item']['empCode']['S'],}), 404 
-                        else:
-                            return jsonify({'respose':"Image not added to index_faces"}), 404
-                    
-                    except:                        
-                        index_face_response=rekognition.index_faces(CollectionId=collection_id,
-                                            Image={'S3Object':{'Bucket':bucket,'Name':path}},
-                                            MaxFaces=1,
-                                            QualityFilter="AUTO",
-                                            DetectionAttributes=['ALL'])
+          index_face_response=rekognition.index_faces(CollectionId=collection_id,
+                              Image={'S3Object':{'Bucket':bucket,'Name':path}},
+                              MaxFaces=1,
+                              QualityFilter="AUTO",
+                              DetectionAttributes=['ALL'])
 
-                        if index_face_response['ResponseMetadata']['HTTPStatusCode'] ==  200:
-                        
-                            try:               
-                                faceId = index_face_response['FaceRecords'][0]['Face']['FaceId']
-                                dynamodb_response = dynamodb.put_item(
-                                    TableName = TableName,
-                                    Item={
-                                        'RekognitionId': {'S': faceId},
-                                        'empCode': {'S': empCode}
-                                        }
-                                    )                            
-                                if dynamodb_response['ResponseMetadata']['HTTPStatusCode'] ==  200:
-                                    return jsonify({"respose": "Face successfully registered"})             
-                                else:
-                                    return jsonify({'respose':"image not added to dynamoDB"}), 404
-                            except:
-                                return jsonify({'respose':"image does not contain face"}), 404            
-                        else:
-                            return jsonify({'respose':"image not added to index_faces"}), 404
-                else:
-                    return jsonify({'respose':"Search faces by image not working"}), 404  
-          except:
-              return jsonify({'respose':"Image does not contain face"}), 404      
+          if index_face_response['ResponseMetadata']['HTTPStatusCode'] ==  200:
+              
+              try:               
+                  faceId = index_face_response['FaceRecords'][0]['Face']['FaceId']
+                  dynamodb_response = dynamodb.put_item(
+                      TableName = TableName,
+                      Item={
+                          'RekognitionId': {'S': faceId},
+                          'empCode': {'S': empCode}
+                          }
+                      )
+                  
+                  if dynamodb_response['ResponseMetadata']['HTTPStatusCode'] ==  200:
+                      return jsonify({"respose": "Face successfully registered"})             
+              
+                  else:
+                      return jsonify({'respose':"image not added to dynamoDB"}), 404
+              except:
+                  return jsonify({'respose':"image does not contain face"}), 404            
+          else:
+              return jsonify({'respose':"image not added to index_faces"}), 404
       else:
           return jsonify({'respose':"image not uploaded on S3"}), 404
     except:
@@ -103,7 +74,7 @@ def verify():
         empCode = request.form['empCode'] 
         image = request.files.get('image')
         
-        threshold=70
+        threshold=80
         path = 'verify/'+ empCode +'.jpg'
         region_name='us-east-2'
         bucket ='attandence-bucket'
