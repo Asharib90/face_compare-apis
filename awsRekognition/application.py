@@ -56,7 +56,7 @@ def register():
                             Key={'RekognitionId':{'S': faceId}})
                         
                         if dynamodb_response['ResponseMetadata']['HTTPStatusCode'] ==  200 :
-                            return jsonify({'error':"Face already registered on ID: " +  dynamodb_response['Item']['empCode']['S'],}), 404 
+                            return jsonify({'error':"Face already registered on ID: " +  dynamodb_response['Item']['empCode']['S'],}), 422 
                         else:
                             return jsonify({'error':"Image not added to index_faces"}), 404
                     
