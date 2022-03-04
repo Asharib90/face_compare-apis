@@ -79,21 +79,21 @@ def register():
                                         }
                                     )                            
                                 if dynamodb_response['ResponseMetadata']['HTTPStatusCode'] ==  200:
-                                    return jsonify({"respose": "Face successfully registered"})             
+                                    return jsonify({"response": "Face successfully registered"})             
                                 else:
-                                    return jsonify({'respose':"image not added to dynamoDB"}), 404
+                                    return jsonify({'error':"image not added to dynamoDB"}), 404
                             except:
-                                return jsonify({'respose':"image does not contain face"}), 404            
+                                return jsonify({'error':"image does not contain face"}), 404            
                         else:
-                            return jsonify({'respose':"image not added to index_faces"}), 404
+                            return jsonify({'error':"image not added to index_faces"}), 404
                 else:
-                    return jsonify({'respose':"Search faces by image not working"}), 404  
+                    return jsonify({'error':"Search faces by image not working"}), 404  
           except:
-              return jsonify({'respose':"Image does not contain face"}), 404      
+              return jsonify({'error':"Image does not contain face"}), 404      
       else:
-          return jsonify({'respose':"image not uploaded on S3"}), 404
+          return jsonify({'error':"image not uploaded on S3"}), 404
     except:
-        return jsonify({'respose':"image not found"}), 404
+        return jsonify({'error':"image not found"}), 404
     
 
 @application.route("/verify",methods=["POST"])
@@ -147,21 +147,21 @@ def verify():
                             
                             if dynamodb_response['Item']['empCode']['S']==empCode:
                             
-                                return jsonify({"respose": "Face verification succeded"}), 200
+                                return jsonify({"response": "Face verification succeded"}), 200
                             else:
-                                return jsonify({'respose':"User face does not match with employee ID"}), 404             
+                                return jsonify({'error':"User face does not match with employee ID"}), 404             
                         else:
-                            return jsonify({'respose':"image not added to index_faces"}), 404
+                            return jsonify({'error':"image not added to index_faces"}), 404
                     except:
-                        return jsonify({'respose':"face verification failed"}), 404  
+                        return jsonify({'error':"face verification failed"}), 404  
                 else:
-                    return jsonify({'respose':"search faces by image not working"}), 404  
+                    return jsonify({'error':"search faces by image not working"}), 404  
             except:
-                return jsonify({'respose':"image does not contain face"}), 404      
+                return jsonify({'error':"image does not contain face"}), 404      
         else:
-            return jsonify({'respose':"image not uploaded on S3"}), 404      
+            return jsonify({'error':"image not uploaded on S3"}), 404      
     except:
-        return jsonify({'respose':"image not found"}), 404
+        return jsonify({'error':"image not found"}), 404
 
 
 if __name__ == "__main__":
