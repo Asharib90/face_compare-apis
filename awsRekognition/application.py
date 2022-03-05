@@ -1,3 +1,4 @@
+from turtle import goto
 from flask import Flask, request, jsonify, flash
 import boto3
 # EB looks for an 'application' callable by default.
@@ -56,11 +57,39 @@ def register():
                             Key={'RekognitionId':{'S': faceId}})
                         
                         if dynamodb_response['ResponseMetadata']['HTTPStatusCode'] ==  200 :
+                            
+                            if dynamodb_response['Item']['empCode']['S'] == empCode:
+                                index_face_response=rekognition.index_faces(CollectionId=collection_id,
+                                            Image={'S3Object':{'Bucket':bucket,'Name':path}},
+                                            MaxFaces=1,
+                                            QualityFilter="AUTO",
+                                            DetectionAttributes=['ALL'])
+
+                                if index_face_response['ResponseMetadata']['HTTPStatusCode'] ==  200:
+                                
+                                    try:               
+                                        faceId = index_face_response['FaceRecords'][0]['Face']['FaceId']
+                                        dynamodb_response = dynamodb.put_item(
+                                            TableName = TableName,
+                                            Item={
+                                                'RekognitionId': {'S': faceId},
+                                                'empCode': {'S': empCode}
+                                                }
+                                            )                            
+                                        if dynamodb_response['ResponseMetadata']['HTTPStatusCode'] ==  200:
+                                            return jsonify({"response": "Face successfully registered"})             
+                                        else:
+                                            return jsonify({'error':"image not added to dynamoDB"}), 404
+                                    except:
+                                        return jsonify({'error':"image does not contain face"}), 404            
+                                else:
+                                    return jsonify({'error':"image not added to index_faces"}), 404                           
+                                    
                             return jsonify({'error':"Face already registered on ID: " +  dynamodb_response['Item']['empCode']['S'],}), 422 
                         else:
                             return jsonify({'error':"Image not added to index_faces"}), 404
                     
-                    except:                        
+                    except:                  
                         index_face_response=rekognition.index_faces(CollectionId=collection_id,
                                             Image={'S3Object':{'Bucket':bucket,'Name':path}},
                                             MaxFaces=1,
