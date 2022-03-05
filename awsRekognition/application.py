@@ -1,4 +1,3 @@
-from turtle import goto
 from flask import Flask, request, jsonify, flash
 import boto3
 # EB looks for an 'application' callable by default.
