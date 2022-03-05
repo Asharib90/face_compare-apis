@@ -88,7 +88,8 @@ def register():
                         else:
                             return jsonify({'error':"Image not added to index_faces"}), 404
                     
-                    except:                  
+                    except:           
+                        print("Face not found")       
                         index_face_response=rekognition.index_faces(CollectionId=collection_id,
                                             Image={'S3Object':{'Bucket':bucket,'Name':path}},
                                             MaxFaces=1,
