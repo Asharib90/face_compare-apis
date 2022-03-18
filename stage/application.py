@@ -85,7 +85,7 @@ def register():
                                 else:
                                     return jsonify({'error':"image not added to index_faces"}), 404                           
                                     
-                            return jsonify({'error':"Face already registered on ID: " +  dynamodb_response['Item']['empCode']['S'],}), 422 
+                            return jsonify({'error':"Face already registered on ID:" +  dynamodb_response['Item']['empCode']['S'],}), 422 
                         else:
                             return jsonify({'error':"Image not added to index_faces"}), 404
                     
