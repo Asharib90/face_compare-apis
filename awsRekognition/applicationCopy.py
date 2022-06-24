@@ -160,11 +160,13 @@ def verify():
                     },
                     CollectionId=collection_id,
                     FaceMatchThreshold=threshold)
+                
+                print(search_faces_by_image_response)
                             
                 if search_faces_by_image_response['ResponseMetadata']['HTTPStatusCode'] ==  200:
                     
-                    print(search_faces_by_image_response['FaceMatches'])
-    
+                    # print(search_faces_by_image_response['FaceMatches'])
+
                     try :               
                         faceId = search_faces_by_image_response['FaceMatches'][0]['Face']['FaceId']
 
